@@ -18,14 +18,15 @@
 |
 */
 
-import Route from '@ioc:Adonis/Core/Route'
-import './routes/buyer'
-import './routes/courier'
-import './routes/request'
-import './routes/category'
-import './routes/product'
-import './routes/auth'
+import Route from "@ioc:Adonis/Core/Route";
+// import "./routes/buyer";
+// import "./routes/courier";
+// import "./routes/request";
+// import "./routes/category";
+// import "./routes/product";
+import "./routes/auth";
+import "./routes/client";
 
-Route.get('/', async () => {
-  return 'Bem vindo a API do grupo 2'
-})
+Route.get("/", async () => {
+  return "Api do Desafio de Backend da W3";
+});

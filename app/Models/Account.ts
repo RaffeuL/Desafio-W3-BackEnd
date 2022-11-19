@@ -19,10 +19,10 @@ export default class Account extends BaseModel {
   @column()
   public balance: number;
 
-  @belongsTo(() => Client)
+  @belongsTo(() => Client, { foreignKey: "client_id" })
   public client: BelongsTo<typeof Client>;
 
-  @belongsTo(() => Agency)
+  @belongsTo(() => Agency, { foreignKey: "agency_id" })
   public agency: BelongsTo<typeof Agency>;
 
   @column.dateTime({ autoCreate: true })

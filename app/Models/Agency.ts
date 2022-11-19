@@ -7,7 +7,7 @@ export default class Agency extends BaseModel {
   public id: number;
 
   @column()
-  public agency_number: number;
+  public agency_number: string;
 
   @hasMany(() => Account, { foreignKey: "agency_id" })
   public accounts: HasMany<typeof Account>;

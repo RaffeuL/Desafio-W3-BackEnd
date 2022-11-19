@@ -5,10 +5,9 @@
  * file.
  */
 
-import Buyer from 'App/Models/Buyer'
-import Courier from 'App/Models/Courier'
+import Client from "App/Models/Client";
 
-declare module '@ioc:Adonis/Addons/Auth' {
+declare module "@ioc:Adonis/Addons/Auth" {
   /*
   |--------------------------------------------------------------------------
   | Providers
@@ -34,15 +33,10 @@ declare module '@ioc:Adonis/Addons/Auth' {
     | different Lucid models.
     |
     */
-    buyer: {
-      implementation: LucidProviderContract<typeof Buyer>
-      config: LucidProviderConfig<typeof Buyer>
-    }
-
-    courier: {
-      implementation: LucidProviderContract<typeof Courier>
-      config: LucidProviderConfig<typeof Courier>
-    }
+    client: {
+      implementation: LucidProviderContract<typeof Client>;
+      config: LucidProviderConfig<typeof Client>;
+    };
   }
 
   /*
@@ -70,16 +64,10 @@ declare module '@ioc:Adonis/Addons/Auth' {
     | to authenticate requests.
     |
     */
-    buyer: {
-      implementation: OATGuardContract<'buyer', 'buyer'>
-      config: OATGuardConfig<'buyer'>
-      client: OATClientContract<'buyer'>
-    }
-
-    courier: {
-      implementation: OATGuardContract<'courier', 'courier'>
-      config: OATGuardConfig<'courier'>
-      client: OATClientContract<'courier'>
-    }
+    client: {
+      implementation: OATGuardContract<"client", "client">;
+      config: OATGuardConfig<"client">;
+      client: OATClientContract<"client">;
+    };
   }
 }

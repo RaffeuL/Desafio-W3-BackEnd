@@ -1,6 +1,13 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, HasMany, hasMany } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  beforeSave,
+  column,
+  HasMany,
+  hasMany,
+} from "@ioc:Adonis/Lucid/Orm";
 import Account from "./Account";
+import Hash from "@ioc:Adonis/Core/Hash";
 
 export default class Client extends BaseModel {
   @column({ isPrimary: true })
@@ -15,11 +22,18 @@ export default class Client extends BaseModel {
   @column()
   public email: string;
 
-  @column()
+  @column({ serializeAs: null })
   public password: string;
 
+  @beforeSave()
+  public static async hashPassword(client: Client) {
+    if (client.$dirty.password) {
+      client.password = await Hash.make(client.password);
+    }
+  }
+
   @column()
-  public birht_date: DateTime;
+  public birth_date: DateTime;
 
   @hasMany(() => Account, { foreignKey: "client_id" })
   public accounts: HasMany<typeof Account>;
