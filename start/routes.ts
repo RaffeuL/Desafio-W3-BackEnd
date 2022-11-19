@@ -26,6 +26,7 @@ import Route from "@ioc:Adonis/Core/Route";
 // import "./routes/product";
 import "./routes/auth";
 import "./routes/client";
+import "./routes/account";
 
 Route.get("/", async () => {
   return "Api do Desafio de Backend da W3";

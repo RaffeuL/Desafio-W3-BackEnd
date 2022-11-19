@@ -41,8 +41,6 @@ export default class AuthController {
         .preload("client")
         .first();
       response.send(account);
-    } else {
-      response.send(auth.use().user);
     }
   }
 

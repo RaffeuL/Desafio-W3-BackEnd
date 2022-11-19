@@ -56,4 +56,23 @@ export default class AccountsController {
       description: `The client ${client.name} has opened an account with the number ${account.account_number} in agency ${agency.agency_number}`,
     });
   }
+
+  public async consultBalance({ request, response }: HttpContextContract) {
+    const account_number = request.input("account_number");
+    const agency_number = request.input("agency_number");
+
+    const account = await Account.query()
+      .where("account_number", account_number)
+      .first();
+
+    if (account) {
+      await account.load("agency");
+      if (account.agency.agency_number != agency_number) {
+        return response.unauthorized({ message: "Invalid agency" });
+      }
+      return response.send({ balance: account.balance });
+    } else {
+      return response.notFound({ message: "Invalid Account" });
+    }
+  }
 }
