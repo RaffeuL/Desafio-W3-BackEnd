@@ -1,7 +1,15 @@
 import { DateTime } from "luxon";
-import { BaseModel, BelongsTo, belongsTo, column } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  BelongsTo,
+  belongsTo,
+  column,
+  HasMany,
+  hasMany,
+} from "@ioc:Adonis/Lucid/Orm";
 import Client from "./Client";
 import Agency from "./Agency";
+import Transaction from "./Transaction";
 
 export default class Account extends BaseModel {
   @column({ isPrimary: true })
@@ -17,6 +25,9 @@ export default class Account extends BaseModel {
   public agency_id: number;
 
   @column()
+  public transaction_id: number;
+
+  @column()
   public balance: number;
 
   @belongsTo(() => Client, { foreignKey: "client_id" })
@@ -24,6 +35,9 @@ export default class Account extends BaseModel {
 
   @belongsTo(() => Agency, { foreignKey: "agency_id" })
   public agency: BelongsTo<typeof Agency>;
+
+  @hasMany(() => Transaction, { foreignKey: "account_id" })
+  public transactions: HasMany<typeof Transaction>;
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime;

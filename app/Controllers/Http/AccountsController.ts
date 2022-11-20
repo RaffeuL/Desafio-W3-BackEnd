@@ -3,6 +3,8 @@ import Account from "App/Models/Account";
 import Agency from "App/Models/Agency";
 import Client from "App/Models/Client";
 import Log from "App/Models/Log";
+import Transaction from "App/Models/Transaction";
+import { DateTime } from "luxon";
 import OpenAccountValidator from "../validators/OpenAccountValidator";
 
 export default class AccountsController {
@@ -43,14 +45,14 @@ export default class AccountsController {
       balance: 0,
     });
 
-    await this.saveLog(client, account, agency);
+    await this.saveAccountLog(client, account, agency);
 
     return response.created({
       message: `Agency Number: ${agency.agency_number}, Account Number: ${account.account_number}`,
     });
   }
 
-  async saveLog(client: Client, account: Account, agency: Agency) {
+  async saveAccountLog(client: Client, account: Account, agency: Agency) {
     await Log.create({
       type: "open_account",
       description: `The client ${client.name} has opened an account with the number ${account.account_number} in agency ${agency.agency_number}`,
@@ -74,5 +76,88 @@ export default class AccountsController {
     } else {
       return response.notFound({ message: "Invalid Account" });
     }
+  }
+
+  public async consultTransactions({ request, response }: HttpContextContract) {
+    const account_number = request.input("account_number");
+    const agency_number = request.input("agency_number");
+
+    const account = await Account.query()
+      .where("account_number", account_number)
+      .first();
+
+    if (account) {
+      await account.load("agency");
+      if (account.agency.agency_number != agency_number) {
+        return response.unauthorized({ message: "Invalid agency" });
+      }
+      await account.load("transactions");
+      return response.send({ transactions: account.transactions });
+    } else {
+      return response.notFound({ message: "Invalid Account" });
+    }
+  }
+
+  public async deposit({ request, response }: HttpContextContract) {
+    const account_number = request.input("account_number");
+    const agency_number = request.input("agency_number");
+    const value: number = request.input("value");
+
+    const account = await Account.query()
+      .where("account_number", account_number)
+      .first();
+
+    if (account) {
+      await account.load("agency");
+      if (account.agency.agency_number != agency_number) {
+        return response.unauthorized({ message: "Invalid agency" });
+      }
+      account.balance += +value;
+      await account.save();
+      this.saveTransactionLog("deposit", `+${value}`, account);
+      return response.send({ balance: account.balance });
+    } else {
+      return response.notFound({ message: "Invalid Account" });
+    }
+  }
+
+  public async withdraw({ request, response }: HttpContextContract) {
+    const account_number = request.input("account_number");
+    const agency_number = request.input("agency_number");
+    const value = request.input("value");
+
+    const account = await Account.query()
+      .where("account_number", account_number)
+      .first();
+
+    if (account) {
+      await account.load("agency");
+      if (account.agency.agency_number != agency_number) {
+        return response.unauthorized({ message: "Invalid agency" });
+      }
+      if (account.balance < value) {
+        return response.unauthorized({ message: "Insufficient balance" });
+      }
+      account.balance -= +value;
+      await account.save();
+      this.saveTransactionLog("withdraw", `-${value}`, account);
+      return response.send({ balance: account.balance });
+    } else {
+      return response.notFound({ message: "Invalid Account" });
+    }
+  }
+
+  async saveTransactionLog(type: string, value: string, account: Account) {
+    await Transaction.create({
+      account_id: account.id,
+      type: type,
+      value: value,
+      date: DateTime.now(),
+    });
+
+    await Log.create({
+      type: "transaction",
+      description: `A transaction of type ${type} with value ${value} has been made by the account ${account.account_number}`,
+    });
   }
 }

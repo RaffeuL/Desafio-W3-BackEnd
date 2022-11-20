@@ -1,16 +1,19 @@
 import BaseSchema from "@ioc:Adonis/Lucid/Schema";
 
 export default class extends BaseSchema {
-  protected tableName = "accounts";
+  protected tableName = "transactions";
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments("id");
-      table.string("account_number");
-      table.integer("client_id").references("clients.id").onDelete("CASCADE");
-      table.integer("agency_id").references("agencies.id").onDelete("CASCADE");
+      table.string("type").notNullable();
+      table.string("value");
+      table.integer("account_id").references("accounts.id").onDelete("CASCADE");
+      table.date("date");
 
-      table.double("balance");
+      /**
+       * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
+       */
       table.timestamp("created_at", { useTz: true });
       table.timestamp("updated_at", { useTz: true });
     });
