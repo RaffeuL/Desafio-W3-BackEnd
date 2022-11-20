@@ -19,11 +19,6 @@
 */
 
 import Route from "@ioc:Adonis/Core/Route";
-// import "./routes/buyer";
-// import "./routes/courier";
-// import "./routes/request";
-// import "./routes/category";
-// import "./routes/product";
 import "./routes/auth";
 import "./routes/client";
 import "./routes/account";
