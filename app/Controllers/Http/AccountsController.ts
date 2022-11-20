@@ -98,6 +98,61 @@ export default class AccountsController {
     }
   }
 
+  public async transference({ request, response }: HttpContextContract) {
+    const {
+      account_number,
+      agency_number,
+      value,
+      destination_account_number,
+      destination_agency_number,
+    } = request.only([
+      "account_number",
+      "agency_number",
+      "value",
+      "destination_account_number",
+      "destination_agency_number",
+    ]);
+
+    const account = await Account.query()
+      .where("account_number", account_number)
+      .first();
+    if (account) {
+      await account.load("agency");
+      if (account.agency.agency_number != agency_number) {
+        return response.unauthorized({ message: "Invalid agency" });
+      }
+      if (account.balance < value) {
+        return response.unauthorized({ message: "Insufficient balance" });
+      }
+      const destinationAccount = await Account.query()
+        .where("account_number", destination_account_number)
+        .first();
+      if (destinationAccount) {
+        await destinationAccount.load("agency");
+        if (
+          destinationAccount.agency.agency_number != destination_agency_number
+        ) {
+          return response.unauthorized({ message: "Invalid agency" });
+        }
+        account.balance -= +value;
+        await account.save();
+        destinationAccount.balance += +value;
+        await destinationAccount.save();
+        this.saveTransactionLog("transference", `-${value}`, account);
+        this.saveTransactionLog(
+          "transference",
+          `+${value}`,
+          destinationAccount
+        );
+        response.send({
+          transference: `The value ${value} was transference from account ${account_number} to account ${destination_account_number}`,
+        });
+      } else {
+        response.notFound({ message: "Invalid Account" });
+      }
+    }
+  }
+
   public async deposit({ request, response }: HttpContextContract) {
     const account_number = request.input("account_number");
     const agency_number = request.input("agency_number");
